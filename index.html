@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Birthday Journey - For Shanza Ayub (Shanzay)</title>
+  <meta name="description" content="An interactive birthday celebration and 17-chapter journey for Shanza Ayub (Shanzay), celebrating college memories, 24 January, and 4 September.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-display: 'Playfair Display', serif;
+      --font-quote: 'Cormorant Garamond', serif;
+      --font-hand: 'Caveat', cursive;
+    }
+    body {
+      font-family: var(--font-body);
+      background-color: #09090b;
+      color: #fafafa;
+      overflow-x: hidden;
+    }
+    .font-serif { font-family: var(--font-display); }
+    .font-quote { font-family: var(--font-quote); }
+    .font-hand { font-family: var(--font-hand); }
+    
+    /* Custom Glassmorphic Shadows */
+    .glass-card {
+      background: rgba(24, 24, 27, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(244, 63, 94, 0.22);
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7), 0 0 35px -5px rgba(244, 63, 94, 0.12);
+    }
+    
+    /* Glowing Animations */
+    @keyframes pulse-gentle {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+    .animate-heartbeat {
+      animation: pulse-gentle 1.2s infinite ease-in-out;
+    }
+
+    /* Starlight Canvas */
+    #star-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-rose-500/30 selection:text-rose-300 relative">
+
+  <!-- Background Animated Starlight Canvas -->
+  <canvas id="star-canvas"></canvas>
+
+  <!-- Ambient Audio Controls & Topbar -->
+  <header class="relative z-10 w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between border-b border-rose-500/15">
+    <div class="flex items-center gap-3">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+      </span>
+      <div>
+        <h1 class="font-serif font-bold text-base sm:text-lg tracking-wide text-rose-200">Shanza Ayub (Shanzay)</h1>
+        <p class="text-[10px] sm:text-xs text-rose-400/80 font-mono">College Days • 24 January • 4 September</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <button id="music-toggle-btn" onclick="toggleMusic()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-200 transition-all">
+        <span id="music-icon">🎵</span>
+        <span id="music-status">Play Melodic Music</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 17-Chapter Display Area -->
+  <main class="relative z-10 w-full max-w-2xl mx-auto px-4 py-6 sm:py-10 my-auto">
+    <div id="main-card" class="glass-card rounded-3xl p-6 sm:p-10 transition-all duration-500 text-center">
+      <!-- Injected via renderChapter() -->
+    </div>
+  </main>
+
+  <!-- Navigation Bar -->
+  <footer class="relative z-10 w-full max-w-xl mx-auto px-4 pb-6 pt-2">
+    <!-- Progress Indicator Dots -->
+    <div id="dots-container" class="flex justify-center items-center gap-1.5 mb-4 overflow-x-auto py-1">
+      <!-- Rendered dynamically -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex items-center justify-between">
+      <button id="btn-prev" onclick="prevChapter()" class="px-5 py-2.5 rounded-full text-xs font-semibold border border-neutral-700 hover:border-rose-500/40 text-neutral-300 transition-all disabled:opacity-30 disabled:pointer-events-none">
+        ← Previous
+      </button>
+
+      <div class="text-center font-mono text-xs text-rose-400" id="chapter-counter">
+        Chapter 1 / 17
+      </div>
+
+      <button id="btn-next" onclick="nextChapter()" class="px-6 py-2.5 rounded-full text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition-all disabled:opacity-40 disabled:pointer-events-none">
+        Next →
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    // ==========================================
+    // 1. DATA: THE 17 CHAPTERS OF SHANZAY'S STORY
+    // ==========================================
+    const chapters = [
+      {
+        id: 1,
+        title: "For My Shanzay",
+        subtitle: "A 17-Chapter Guided Journey Through Time & Love",
+        badge: "Chapter 01 • Overture",
+        quote: "In a world of billions, my story truly began in the seat next to yours.",
+        body: "Welcome to your personal digital sanctuary, Shanzay. This entire experience was built line by line, melody by melody, just for you. From the lecture halls where we first locked eyes, to the sacred warmth of 24 January, and the celestial miracle of 4 September — every second today belongs to you, Shanza Ayub.",
+        details: [
+          "✨ 17 curated chapters of our story",
+          "🎵 Ambient acoustic synthesizer playing our melody",
+          "🎈 Interactive memories, secret questions & surprises ahead"
+        ]
+      },
+      {
+        id: 2,
+        title: "The College Hallways",
+        subtitle: "Where Fate Wore the Disguise of Ordinary Days",
+        badge: "Chapter 02 • College Days",
+        quote: "I didn’t go to class for the attendance. I went hoping I’d see you walk through the door.",
+        body: "I still remember those bright mornings in college. Crowded stairways, heavy backpacks, morning lectures... but none of that mattered once you walked into the classroom. The way you took your seat, adjusted your notebook, and smiled at your friends made the entire lecture hall fade into background blur.",
+        details: [
+          "📚 Row 3, near the second window where the sun touched your hair",
+          "🎒 The hurried walks down the corridor just to match your pace",
+          "✨ When an ordinary classmate became the center of gravity"
+        ]
+      },
+      {
+        id: 3,
+        title: "That Very First Smile",
+        subtitle: "The Moment Everything Changed Color",
+        badge: "Chapter 03 • Turning Point",
+        quote: "You smiled at me once, and I spent the rest of the week replaying that second in my head.",
+        body: "It was after a long afternoon lecture. Everyone was packing up, rushing to leave. You turned back, caught my gaze, and gave me that effortless, gentle smile of yours. In that exact fraction of a second, you ceased being just Shanza the classmate. You became the girl whose laughter could dictate the weather in my chest.",
+        details: [
+          "☕ That breathless feeling walking out of the building",
+          "💫 Realizing college wasn't about grades anymore, it was about you",
+          "🌸 A smile that has stayed with me every single day since"
+        ]
+      },
+      {
+        id: 4,
+        title: "24 January — The First Hug",
+        subtitle: "When the Cold Winter Melted Into Forever",
+        badge: "Chapter 04 • 24 January Milestone",
+        quote: "Some dates are just numbers. 24 January is when my heart learned how to beat properly.",
+        body: "24th of January. The crisp winter breeze, the quiet evening. I remember my heartbeat hammering in my throat. And then, the world stopped moving — your arms wrapped around me, and for the first time in my life, I knew what absolute peace felt like.",
+        isHeartbeat: true
+      },
+      {
+        id: 5,
+        title: "Canteen Teas & Library Whispers",
+        subtitle: "The Unwritten Chapters of Our Days",
+        badge: "Chapter 05 • College Nostalgia",
+        quote: "The best conversations we ever had were the ones we had to whisper.",
+        body: "Sitting across from you at the college canteen, sharing tea in small paper cups, sneaking glances across the quiet library tables. We pretended to study for upcoming midterms, but we spent half the time passing folded slips of paper and laughing at jokes only the two of us understood.",
+        details: [
+          "🫖 Canteen chai that grew cold because we couldn't stop talking",
+          "🤫 Library shushes that made us laugh even harder",
+          "📝 Margins of notebooks filled with scribbles of your name"
+        ]
+      },
+      {
+        id: 6,
+        title: "A Question for Shanzay",
+        subtitle: "Interactive Test of Honesty",
+        badge: "Chapter 06 • Interactive Milestone 1",
+        isQuestion: true,
+        q: "Did you know from our very first semester in college that you would become my whole world?",
+        yes: "YES! (Always knew ❤️)",
+        no: "No 😜"
+      },
+      {
+        id: 7,
+        title: "The Little Things About Shanza",
+        subtitle: "A Masterpiece Made of Subtle Details",
+        badge: "Chapter 07 • Admiration",
+        quote: "God spent extra time crafting your kindness.",
+        body: "It isn't just your beauty, Shanza Ayub. It's the way you speak with gentle grace. It’s your quiet resilience, your quick wit, the way you tilt your head when listening, and that genuine warmth you offer to the people around you. You make this chaotic world feel gentle.",
+        details: [
+          "🕊️ Your effortless poise and genuine heart",
+          "✨ The sparkle in your eyes when you get excited about little things",
+          "💖 The unconditional kindness that makes everyone respect you"
+        ]
+      },
+      {
+        id: 8,
+        title: "Through Every Exam & Semester",
+        subtitle: "My Constant Anchor",
+        badge: "Chapter 08 • Bond",
+        quote: "College was tough, but with you, every storm had an umbrella.",
+        body: "College threw everything at us — sleepless exam nights, presentation nerves, unpredictable schedules. Yet, no matter how overwhelmed I felt, a single text from you, or meeting you on the stairs before an exam, made all the anxiety dissolve into courage. You became my favorite companion through it all.",
+        details: [
+          "🌙 Late night study check-ins asking 'Did you finish chapter 4?'",
+          "☕ Exam day pep talks that carried me through",
+          "🏆 Celebrating small victories together with smiles"
+        ]
+      },
+      {
+        id: 9,
+        title: "The Rainy Campus Courtyard",
+        subtitle: "When the Skies Played Our Song",
+        badge: "Chapter 09 • Memory",
+        quote: "Gray rainy days with you were brighter than the sunniest afternoons.",
+        body: "Remember that sudden afternoon downpour that trapped us under the campus veranda? Water was rushing off the roof, everyone was scrambling, and we just stood side by side, watching the droplets splash against the pavement. The smell of petrichor, the cold air, and your hand near mine — I wished the rain would never stop.",
+        details: [
+          "🌧️ Watching raindrops cascade down the campus trees",
+          "☂️ Standing close under the shelter, secretly grateful for the storm",
+          "🌈 Knowing I'd brave any weather as long as it's with you"
+        ]
+      },
+      {
+        id: 10,
+        title: "A Promise for Tomorrow",
+        subtitle: "The Next Interactive Gate",
+        badge: "Chapter 10 • Interactive Milestone 2",
+        isQuestion: true,
+        q: "Will you promise to keep making unforgettable memories and smiling with me forever?",
+        yes: "YES, Forever & Always! ✨",
+        no: "Let me think... No 🙈"
+      },
+      {
+        id: 11,
+        title: "4 September — The Miracle Day",
+        subtitle: "The Calendar’s Greatest Blessing",
+        badge: "Chapter 11 • 4 September Birthday",
+        quote: "On 4 September, the world got a little brighter, a little sweeter, and infinitely more beautiful.",
+        body: "September 4th is not just a date on the calendar; it is the anniversary of the moment the universe welcomed Shanza Ayub. Today, we celebrate your existence, your breath, your laugh, and every magnificent chapter you are yet to write.",
+        isDateBadge: true
+      },
+      {
+        id: 12,
+        title: "The Melody of 'Shanzay'",
+        subtitle: "Seven Letters, One Unmatched Feeling",
+        badge: "Chapter 12 • Musical Ode",
+        quote: "Others hear a name. I hear the prettiest song ever composed.",
+        body: "To the world, you are Shanza. But to me, you are my Shanzay. Tap each letter below to hear how your name rings through the chords of my heart.",
+        isMusicalLetters: true
+      },
+      {
+        id: 13,
+        title: "The Final Question Before the Magic",
+        subtitle: "The Gate to the Birthday Finale",
+        badge: "Chapter 13 • Interactive Milestone 3",
+        isQuestion: true,
+        q: "Do you know how deeply loved, valued, and cherished you are by me?",
+        yes: "To Infinity & Beyond! 💖",
+        no: "Only a little bit 😝"
+      },
+      {
+        id: 14,
+        title: "Our Memory Constellation",
+        subtitle: "Interactive 3D Keepsakes",
+        badge: "Chapter 14 • 3D Polaroids",
+        quote: "Flip each polaroid to uncover the secret notes written behind our days.",
+        body: "Touch any polaroid card below to flip it in 3D and read the private notes from our college days and 24 January.",
+        isPolaroids: true
+      },
+      {
+        id: 15,
+        title: "Blow The Birthday Candles",
+        subtitle: "The 4th September Birthday Ritual",
+        badge: "Chapter 15 • Birthday Cake",
+        quote: "Close your eyes, breathe, and let the universe fulfill your deepest wish.",
+        body: "A birthday cake prepared specially for Shanza. Tap the candles to blow them out, or click the button to blow them all out together and seal your wish in the stars!",
+        isCake: true
+      },
+      {
+        id: 16,
+        title: "The Surprise Vault",
+        subtitle: "Exclusive Unlocks for Shanzay",
+        badge: "Chapter 16 • Surprise Clicks",
+        quote: "Some gifts cannot be wrapped in paper; they can only be wrapped in devotion.",
+        body: "Tap each of the mystery boxes to reveal heartfelt letters, lifetime coupons, and memories tailored exclusively for Shanza Ayub.",
+        isVault: true
+      },
+      {
+        id: 17,
+        title: "Eternal Birthday Starlight",
+        subtitle: "Happy Birthday, My Shanza Ayub",
+        badge: "Chapter 17 • Grand Finale",
+        quote: "Classmates in college. Best friends in life. My whole heart forever.",
+        body: "Happy Birthday, my Shanzay. May your 4th of September mark the beginning of your most glorious year yet. Thank you for 24 January, thank you for every shared laugh, and thank you for being you. You are loved beyond measure.",
+        isFinale: true
+      }
+    ];
+
+    // ==========================================
+    // 2. STATE
+    // ==========================================
+    let currentChapterIndex = 0;
+    const unlockedQuestions = { 6: false, 10: false, 13: false };
+    const candlesState = [true, true, true, true, true];
+    const unlockedVaults = [false, false, false, false];
+
+    // ==========================================
+    // 3. SOUND SYNTHESIZER (Web Audio API)
+    // ==========================================
+    let audioCtx = null;
+    let isBgmPlaying = false;
+    let bgmInterval = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, dur = 0.6, type = 'sine', vol = 0.15) {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    function playHeartbeatSound() {
+      playTone(65, 0.25, 'sine', 0.4);
+      setTimeout(() => playTone(55, 0.35, 'sine', 0.3), 180);
+    }
+
+    // Melodic music box loop
+    const chords = [
+      [261.63, 329.63, 392.00], // C
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // F
+      [196.00, 246.94, 293.66], // G
+    ];
+    let chordIndex = 0;
+
+    function startBgm() {
+      isBgmPlaying = true;
+      document.getElementById('music-status').innerText = 'Melody Playing 🎶';
+      document.getElementById('music-icon').innerText = '⏸️';
+      
+      bgmInterval = setInterval(() => {
+        if (!isBgmPlaying) return;
+        const chord = chords[chordIndex % chords.length];
+        chord.forEach((freq, idx) => {
+          setTimeout(() => {
+            if (isBgmPlaying) playTone(freq * 2, 1.2, 'sine', 0.06);
+          }, idx * 300);
+        });
+        chordIndex++;
+      }, 1600);
+    }
+
+    function stopBgm() {
+      isBgmPlaying = false;
+      clearInterval(bgmInterval);
+      document.getElementById('music-status').innerText = 'Play Melodic Music';
+      document.getElementById('music-icon').innerText = '🎵';
+    }
+
+    function toggleMusic() {
+      if (isBgmPlaying) stopBgm();
+      else startBgm();
+    }
+
+    // ==========================================
+    // 4. CHAPTER RENDERING
+    // ==========================================
+    function renderChapter() {
+      const c = chapters[currentChapterIndex];
+      const card = document.getElementById('main-card');
+      const counter = document.getElementById('chapter-counter');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      counter.innerText = `Chapter ${c.id} / 17`;
+      btnPrev.disabled = currentChapterIndex === 0;
+
+      // Lock next button if question not unlocked
+      if (c.isQuestion && !unlockedQuestions[c.id]) {
+        btnNext.disabled = true;
+        btnNext.style.opacity = '0.35';
+      } else {
+        btnNext.disabled = false;
+        btnNext.style.opacity = '1';
+      }
+
+      renderDots();
+
+      // Custom Content Views
+      if (c.isCake) {
+        renderCakeView(c, card);
+        return;
+      }
+      if (c.isQuestion) {
+        renderQuestionView(c, card);
+        return;
+      }
+      if (c.isHeartbeat) {
+        renderHeartbeatView(c, card);
+        return;
+      }
+      if (c.isMusicalLetters) {
+        renderMusicalLettersView(c, card);
+        return;
+      }
+      if (c.isPolaroids) {
+        renderPolaroidsView(c, card);
+        return;
+      }
+      if (c.isVault) {
+        renderVaultView(c, card);
+        return;
+      }
+      if (c.isFinale) {
+        renderFinaleView(c, card);
+        return;
+      }
+
+      // Standard Chapter Template
+      let detailsHtml = '';
+      if (c.details) {
+        detailsHtml = `
+          <div class="mt-6 space-y-2.5 max-w-md mx-auto text-left">
+            ${c.details.map(d => `
+              <div class="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-300 flex items-center gap-2">
+                <span>${d}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      let dateBadgeHtml = '';
+      if (c.isDateBadge) {
+        dateBadgeHtml = `
+          <div class="my-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold">
+            🌟 4th of September • Born to Light Up the World
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-1.5">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-4">${c.subtitle}</p>
+        ${dateBadgeHtml}
+        <p class="font-quote italic text-lg sm:text-xl text-rose-200/90 mb-4 max-w-lg mx-auto">"${c.quote}"</p>
+        <p class="text-sm sm:text-base font-hand text-lg sm:text-xl text-neutral-200 leading-relaxed max-w-lg mx-auto mb-2">${c.body}</p>
+        ${detailsHtml}
+      `;
+    }
+
+    function renderDots() {
+      const container = document.getElementById('dots-container');
+      container.innerHTML = chapters.map((c, i) => `
+        <button onclick="goToChapter(${i})" class="h-2 rounded-full transition-all duration-300 ${i === currentChapterIndex ? 'w-6 bg-rose-500' : 'w-2 bg-neutral-700 hover:bg-neutral-500'}" title="Chapter ${c.id}"></button>
+      `).join('');
+    }
+
+    // 24 January Heart Hug View
+    function renderHeartbeatView(c, card) {
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-1.5">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-4">${c.subtitle}</p>
+
+        <div class="my-6">
+          <div onclick="triggerHugHeart()" class="cursor-pointer mx-auto w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-rose-500/20 border-2 border-rose-500/50 flex items-center justify-center text-4xl sm:text-5xl animate-heartbeat shadow-[0_0_40px_rgba(244,63,94,0.3)] hover:scale-110 transition-transform">
+            ❤️
+          </div>
+          <p class="text-xs text-rose-300 font-mono mt-3">Touch heart to hear the 24 January heartbeat</p>
+        </div>
+
+        <p class="font-quote italic text-lg text-rose-200 mb-3">"${c.quote}"</p>
+        <p class="font-hand text-xl text-neutral-200 max-w-lg mx-auto leading-relaxed">${c.body}</p>
+      `;
+    }
+
+    function triggerHugHeart() {
+      playHeartbeatSound();
+      confetti({ particleCount: 35, spread: 60, origin: { y: 0.55 }, colors: ['#f43f5e', '#fb7185', '#fda4af'] });
+    }
+
+    // Runaway Question View (Chapters 6, 10, 13)
+    function renderQuestionView(c, card) {
+      const isUnlocked = unlockedQuestions[c.id];
+
+      if (isUnlocked) {
+        card.innerHTML = `
+          <div class="py-6">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-3">
+              ✨ Question Answered & Unlocked
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">${c.title}</h2>
+            <p class="font-hand text-2xl text-rose-300 my-6">"You answered YES! My heart is forever yours, Shanzay ❤️"</p>
+            <p class="text-xs text-neutral-400 mb-6">The gate is now open. Click <b>Next →</b> below to proceed.</p>
+            <button onclick="nextChapter()" class="px-8 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30">
+              Continue Journey →
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-6">${c.subtitle}</p>
+
+        <div class="p-4 sm:p-6 rounded-2xl bg-neutral-900/80 border border-rose-500/20 max-w-md mx-auto mb-8">
+          <p class="text-sm sm:text-base font-medium text-neutral-200">${c.q}</p>
+        </div>
+
+        <div class="relative min-h-[160px] flex items-center justify-center gap-4 flex-wrap">
+          <button onclick="answerYes(${c.id})" class="px-8 py-3.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-xl shadow-rose-600/40 transition-all transform active:scale-95">
+            ❤️ ${c.yes}
+          </button>
+          <button id="runaway-btn" onmouseover="dodgeRunaway()" onclick="dodgeRunaway()" class="px-6 py-3 rounded-full border border-neutral-700 bg-neutral-800/80 text-neutral-400 text-xs font-semibold transition-transform">
+            ${c.no}
+          </button>
+        </div>
+      `;
+    }
+
+    function dodgeRunaway() {
+      playTone(320, 0.15, 'triangle', 0.2);
+      const btn = document.getElementById('runaway-btn');
+      if (!btn) return;
+      const x = (Math.random() - 0.5) * 220;
+      const y = (Math.random() - 0.5) * 140;
+      btn.style.position = 'relative';
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+      const playfulQuotes = ["Nope! 😜", "Can't touch this!", "Click YES! ❤️", "Try again Shanzay! 😂", "No way! 🙈"];
+      btn.innerText = playfulQuotes[Math.floor(Math.random() * playfulQuotes.length)];
+    }
+
+    function answerYes(chapterId) {
+      unlockedQuestions[chapterId] = true;
+      playTone(659, 0.4, 'sine', 0.3);
+      setTimeout(() => playTone(880, 0.5, 'sine', 0.3), 150);
+      confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+      renderChapter();
+    }
+
+    // Musical Letters View ("S-H-A-N-Z-A-Y")
+    function renderMusicalLettersView(c, card) {
+      const letters = [
+        { char: 'S', note: 'Shining', freq: 261.63 },
+        { char: 'H', note: 'Heartwarming', freq: 293.66 },
+        { char: 'A', note: 'Adorable', freq: 329.63 },
+        { char: 'N', note: 'Noble', freq: 349.23 },
+        { char: 'Z', note: 'Zealous', freq: 392.00 },
+        { char: 'A', note: 'Angelic', freq: 440.00 },
+        { char: 'Y', note: 'Yearning', freq: 523.25 },
+      ];
+
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-4">${c.subtitle}</p>
+        <p class="font-quote italic text-lg text-rose-200 mb-6">"${c.quote}"</p>
+
+        <p class="text-xs text-neutral-400 mb-4">Tap each letter of your name to play its musical note:</p>
+
+        <div class="grid grid-cols-7 gap-2 max-w-md mx-auto mb-6">
+          ${letters.map((l, i) => `
+            <button onclick="playLetterNote(${l.freq}, '${l.note}')" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-neutral-900/90 border border-rose-500/30 hover:border-rose-400 hover:bg-rose-500/20 active:scale-95 transition-all">
+              <span class="font-serif font-bold text-xl text-rose-200">${l.char}</span>
+              <span class="text-[9px] text-neutral-400 font-mono mt-1 hidden sm:inline">${l.note}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div id="letter-feedback" class="h-6 text-xs font-hand text-xl text-rose-300"></div>
+      `;
+    }
+
+    function playLetterNote(freq, note) {
+      playTone(freq, 0.7, 'sine', 0.25);
+      const fb = document.getElementById('letter-feedback');
+      if (fb) fb.innerText = `Played note for: ${note} ✨`;
+    }
+
+    // 3D Polaroids View
+    function renderPolaroidsView(c, card) {
+      const items = [
+        { front: "📚 College Classrooms", back: "Looking over at row 3, pretending to listen to professors while only listening to your laughter." },
+        { front: "☕ Canteen Chai", back: "Small paper cups and endless conversations that made us forget the entire schedule." },
+        { front: "❄️ 24 January", back: "The winter night that forever changed the meaning of warmth. The sacred hug." },
+        { front: "🎂 4 September", back: "The universe's masterpiece: The day Shanza Ayub came into this world." },
+      ];
+
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-6">${c.subtitle}</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto text-left">
+          ${items.map((it, i) => `
+            <div onclick="flipPolaroid(${i})" id="polaroid-${i}" class="cursor-pointer p-4 rounded-2xl bg-neutral-900/90 border border-rose-500/25 hover:border-rose-400/60 transition-all">
+              <div class="text-xs font-bold text-rose-300 mb-1 flex items-center justify-between">
+                <span>${it.front}</span>
+                <span class="text-[10px] text-neutral-500">Tap to flip 🔄</span>
+              </div>
+              <p id="polaroid-text-${i}" class="text-xs text-neutral-400 font-hand text-base">Tap card to read the secret note written on the back...</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const polaroidFlipped = [false, false, false, false];
+    function flipPolaroid(i) {
+      playTone(493.88, 0.3, 'sine', 0.2);
+      polaroidFlipped[i] = !polaroidFlipped[i];
+      const items = [
+        "Looking over at row 3, pretending to listen to professors while only listening to your laughter.",
+        "Small paper cups and endless conversations that made us forget the entire schedule.",
+        "The winter night that forever changed the meaning of warmth. The sacred hug.",
+        "The universe's masterpiece: The day Shanza Ayub came into this world."
+      ];
+      const p = document.getElementById(`polaroid-text-${i}`);
+      if (polaroidFlipped[i]) {
+        p.innerText = `"${items[i]}"`;
+        p.className = "text-sm text-rose-200 font-hand text-lg italic";
+      } else {
+        p.innerText = "Tap card to read the secret note written on the back...";
+        p.className = "text-xs text-neutral-400 font-hand text-base";
+      }
+    }
+
+    // Birthday Cake View
+    function renderCakeView(c, card) {
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-1.5">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-4">${c.subtitle}</p>
+
+        <!-- Birthday Cake UI -->
+        <div class="my-6 p-6 rounded-3xl bg-neutral-900/90 border border-rose-500/30 max-w-sm mx-auto shadow-inner">
+          <!-- Candles -->
+          <div class="flex justify-center items-end gap-4 h-16 mb-2">
+            ${candlesState.map((lit, i) => `
+              <div onclick="blowCandle(${i})" class="cursor-pointer flex flex-col items-center">
+                <span class="text-xl transition-all ${lit ? 'animate-bounce' : 'opacity-20 scale-75'}">${lit ? '🔥' : '💨'}</span>
+                <div class="w-2.5 h-7 rounded-sm bg-gradient-to-t from-rose-400 to-rose-200 shadow-sm"></div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Cake Layers -->
+          <div class="mx-auto w-44 h-12 rounded-t-2xl bg-gradient-to-r from-rose-500 via-pink-400 to-rose-500 border-t-2 border-white/40 flex items-center justify-center text-xs font-bold text-white tracking-widest uppercase">
+            Shanzay
+          </div>
+          <div class="mx-auto w-56 h-14 rounded-b-2xl bg-gradient-to-r from-rose-700 via-rose-600 to-rose-700 border-t border-rose-400/40 flex items-center justify-center text-xs text-rose-200">
+            4 September • Happy Birthday
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-3">
+          <button onclick="blowAllCandles()" class="px-6 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition-all active:scale-95">
+            💨 Blow Out All Candles & Make a Wish ✨
+          </button>
+        </div>
+      `;
+    }
+
+    function blowCandle(i) {
+      candlesState[i] = !candlesState[i];
+      playTone(523, 0.2);
+      if (!candlesState[i]) {
+        confetti({ particleCount: 20, spread: 45, origin: { y: 0.6 } });
+      }
+      renderChapter();
+    }
+
+    function blowAllCandles() {
+      for (let i = 0; i < candlesState.length; i++) candlesState[i] = false;
+      playTone(523.25, 0.2);
+      setTimeout(() => playTone(659.25, 0.3), 100);
+      setTimeout(() => playTone(783.99, 0.6), 250);
+      confetti({ particleCount: 100, spread: 90, origin: { y: 0.5 } });
+      renderChapter();
+    }
+
+    // Surprise Vault View
+    function renderVaultView(c, card) {
+      const vaults = [
+        { title: "Secret College Letter", preview: "Read what I wrote in class...", text: "Dear Shanza, every time you asked to borrow a pen or asked about homework, I wanted to say: you are the reason I love coming to college." },
+        { title: "24 January Keepsake", preview: "The Winter Milestone", text: "On 24 January, time stopped. I keep that hug locked in the safest corner of my soul." },
+        { title: "Lifetime VIP Pass", preview: "Your Personal Guarantee", text: "Valid Forever: Unlimited warm coffee, listening whenever you need, and a best friend who will stand by you through every storm." },
+        { title: "4 September Wish", preview: "Birthday Blessing", text: "May God bless Shanza Ayub with happiness so deep that not even a shadow of sadness touches her smile." },
+      ];
+
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+          ${c.badge}
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mb-1.5">${c.title}</h2>
+        <p class="text-xs sm:text-sm text-rose-400 font-medium mb-6">${c.subtitle}</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto text-left">
+          ${vaults.map((v, i) => `
+            <div onclick="unlockVault(${i})" class="cursor-pointer p-4 rounded-2xl bg-neutral-900/90 border ${unlockedVaults[i] ? 'border-rose-400 bg-rose-950/20' : 'border-neutral-800'} transition-all">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-rose-300">${v.title}</span>
+                <span class="text-sm">${unlockedVaults[i] ? '🔓' : '🎁'}</span>
+              </div>
+              <p class="text-xs text-neutral-400 font-hand text-base">
+                ${unlockedVaults[i] ? `"${v.text}"` : `Tap gift box to open...`}
+              </p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function unlockVault(i) {
+      unlockedVaults[i] = !unlockedVaults[i];
+      playTone(587.33, 0.35, 'sine', 0.25);
+      if (unlockedVaults[i]) {
+        confetti({ particleCount: 30, spread: 60, origin: { y: 0.6 } });
+      }
+      renderChapter();
+    }
+
+    // Finale View
+    function renderFinaleView(c, card) {
+      card.innerHTML = `
+        <span class="inline-block px-3 py-1 rounded-full text-[10px] tracking-widest font-semibold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40 mb-3">
+          ${c.badge}
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-serif font-bold text-white mb-2">Happy Birthday, Shanza Ayub!</h1>
+        <p class="text-sm text-rose-400 font-medium mb-6 font-mono">4 September • For My Irreplaceable Shanzay</p>
+
+        <div class="my-6 p-6 rounded-3xl bg-neutral-900/80 border border-rose-500/30 max-w-lg mx-auto text-center">
+          <p class="font-quote italic text-xl sm:text-2xl text-rose-200 mb-4">"${c.quote}"</p>
+          <p class="font-hand text-xl sm:text-2xl text-neutral-200 leading-relaxed">${c.body}</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mt-8">
+          <button onclick="launchCelebrationFireworks()" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xl shadow-rose-600/40 transition-all">
+            🎆 Launch Birthday Fireworks & Confetti
+          </button>
+          <button onclick="goToChapter(0)" class="w-full sm:w-auto px-6 py-3 rounded-full border border-neutral-700 hover:border-rose-500/40 text-neutral-300 text-xs transition-all">
+            ↺ Replay from Chapter 1
+          </button>
+        </div>
+      `;
+    }
+
+    function launchCelebrationFireworks() {
+      playTone(523.25, 0.4);
+      setTimeout(() => playTone(659.25, 0.4), 150);
+      setTimeout(() => playTone(783.99, 0.5), 300);
+      setTimeout(() => playTone(1046.50, 0.8), 450);
+
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        confetti({
+          particleCount: 40,
+          spread: 80,
+          origin: { x: Math.random(), y: Math.random() - 0.2 },
+          colors: ['#f43f5e', '#fb7185', '#fda4af', '#fbbf24', '#ffffff']
+        });
+      }, 250);
+    }
+
+    // ==========================================
+    // 5. NAVIGATION LOGIC
+    // ==========================================
+    function nextChapter() {
+      if (currentChapterIndex < chapters.length - 1) {
+        currentChapterIndex++;
+        playTone(440, 0.15, 'sine', 0.1);
+        renderChapter();
+      }
+    }
+
+    function prevChapter() {
+      if (currentChapterIndex > 0) {
+        currentChapterIndex--;
+        playTone(392, 0.15, 'sine', 0.1);
+        renderChapter();
+      }
+    }
+
+    function goToChapter(index) {
+      currentChapterIndex = index;
+      playTone(440, 0.15, 'sine', 0.1);
+      renderChapter();
+    }
+
+    // ==========================================
+    // 6. ANIMATED BACKGROUND STARLIGHT CANVAS
+    // ==========================================
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = [];
+      const numStars = Math.floor((canvas.width * canvas.height) / 8000);
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5,
+          alpha: Math.random() * 0.8 + 0.2,
+          speed: Math.random() * 0.3 + 0.1
+        });
+      }
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(251, 113, 133, ${s.alpha})`;
+        ctx.fill();
+        s.y -= s.speed;
+        if (s.y < 0) s.y = canvas.height;
+      });
+      requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateStars();
+
+    // Initial Render
+    renderChapter();
+  </script>
+</body>
+</html>
